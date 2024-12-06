@@ -1,0 +1,92 @@
+/*
+ * FMSH PSOC board DTS
+ * Child board A NAND_CAN_SD
+ *
+ * Copyright (C) 2018 FMSH, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+#include "fmsh-psoc.dtsi"
+
+/ {
+	model = "FMSH PSOC Board";
+	compatible = "fmsh,fmsh-psoc";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00100000 0x3ff00000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/ram rw";
+		/* bootloader will place initrd at this address */
+		linux,initrd-start = <0x12000000>;
+		linux,initrd-end = <0x13000000>;
+	};
+
+        aliases {
+              serial0 = &uart0;
+              serial1 = &uart1;
+        };
+};
+
+&mmc0 {
+	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&mmc1 {
+	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&gmac0 {
+	status = "okay";
+};
+
+&nand {
+	status = "okay";
+
+	firmware@0 {
+		label = "firmware";
+		reg = <0 0x2000000>;
+	};
+	rootfs@2000000 {
+		label ="rootfs";
+		reg = <0x2000000 0x7b00000>;
+	};
+};
+
+&can0 {
+	status = "okay";
+};
+
+&can1 {
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+

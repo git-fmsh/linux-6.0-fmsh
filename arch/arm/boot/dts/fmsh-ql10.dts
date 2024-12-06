@@ -1,0 +1,178 @@
+/*
+ * FMSH PSOC board DTS
+ * Child board C EMMC_SRAM
+ *
+ * Copyright (C) 2018 FMSH, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+#include "fmsh-psoc.dtsi"
+
+/ {
+	model = "FMSH PSOC Board";
+	compatible = "fmsh,fmsh-psoc";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00100000 0x3ff00000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/ram rw";
+		// bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 clk_ignore_unused root=/dev/ram rw";
+		/* bootloader will place initrd at this address */
+		linux,initrd-start = <0x12000000>;
+		linux,initrd-end = <0x12800000>;
+	};
+
+        aliases {
+              serial0 = &uart0;
+              serial1 = &uart1;
+        };
+};
+
+&nor0 {
+	status = "okay";
+};
+
+&nor1 {
+	status = "okay";
+};
+
+&sram0 {
+//	status = "okay";
+};
+
+&sram1 {
+//	status = "okay";
+};
+
+&dmahost {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&spi0 {
+	cs-gpios = <&portb 10 0>;
+//	status = "okay";
+
+	spidev0: spi@0 {
+		/* Same as "spidev" but without errors at boot. Search "buggy DT" to understand */
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		spi-max-frequency = <54000000>;
+	};
+};
+
+&spi1 {
+	cs-gpios = <&portb 17 0>;
+//	status = "okay";
+
+	flash1@0 {
+		compatible = "spi-flash","spansion,s25fl256s1", "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <500000>;
+	};
+};
+
+&nand {
+//	status = "okay";
+};
+
+&can0 {
+//	status = "okay";
+};
+
+&can1 {
+//	status = "okay";
+};
+
+&i2c0 {
+//	status = "okay";
+};
+
+&i2c1 {
+//	status = "okay";
+
+	eeprom@52 {
+		compatible = "atmel,24c256";
+		reg = <0x52>;
+	};
+};
+
+&mmc0 {
+//	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&mmc1 {
+//	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&gmac0 {
+//	status = "okay";
+};
+
+&gmac1 {
+//	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+//	status = "okay";
+};
+
+&qspi0 {
+//	status = "okay";
+
+	flash: flash@0 {
+		compatible = "spansion,s25fl256s1", "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+		cdns,read-delay = <2>;
+		cdns,tshsl-ns = <0>;
+		cdns,tsd2d-ns = <0>;
+		cdns,tchsh-ns = <0>;
+		cdns,tslch-ns = <0>;
+	};
+};
+
+&qspi1 {
+//	status = "okay";
+
+	flash1: flash@0 {
+		compatible = "spansion,s25fl256s1", "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+		cdns,read-delay = <2>;
+		cdns,tshsl-ns = <0>;
+		cdns,tsd2d-ns = <0>;
+		cdns,tchsh-ns = <0>;
+		cdns,tslch-ns = <0>;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+

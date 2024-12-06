@@ -1,0 +1,155 @@
+/*
+ * FMSH PSOC board DTS
+ * Child board C EMMC_SRAM
+ *
+ * Copyright (C) 2018 FMSH, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+#include "fmsh-psoc.dtsi"
+
+/ {
+	model = "FMSH PSOC Board";
+	compatible = "fmsh,fmsh-psoc";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00100000 0x3ff00000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/ram rw";
+		// bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 clk_ignore_unused root=/dev/ram rw";
+		/* bootloader will place initrd at this address */
+		linux,initrd-start = <0x12000000>;
+		linux,initrd-end = <0x12800000>;
+	};
+
+	aliases {
+			serial0 = &uart0;
+			serial1 = &uart1;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led1 {
+			label = "led1";
+			gpios = <&portc 5 0>;
+			default-state = "off";
+		};
+
+		led2 {
+			label = "led2";
+			gpios = <&portc 2 0>;
+			default-state = "off";
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <&portc 6 0>;
+			default-state = "off";
+		};
+
+		led4 {
+			label = "led4";
+			gpios = <&portc 0 0>;
+			default-state = "off";
+		};
+
+		led5 {
+			label = "led5";
+			gpios = <&portc 4 0>;
+			default-state = "off";
+		};
+
+		led6 {
+			label = "led6";
+			gpios = <&portc 3 0>;
+			default-state = "off";
+		};
+
+		led7 {
+			label = "led7";
+			gpios = <&portc 7 0>;
+			default-state = "off";
+		};
+	};
+};
+
+&clkc {
+	ps-clk-frequency = <33333333>;
+};
+
+&dmahost {
+	status = "okay";
+};
+
+&usbphy0 {
+	status = "okay";
+};
+
+&usb0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&mmc0 {
+	broken-cd;		// poll
+	card-detect-delay = <200>;
+	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&mmc1 {
+//	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+};
+
+&gmac0 {
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+//	status = "okay";
+};
+
+&qspi0 {
+	status = "okay";
+
+	flash: flash@0 {
+		compatible = "spansion,s25fl256s1", "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+		cdns,read-delay = <2>;
+		cdns,tshsl-ns = <0>;
+		cdns,tsd2d-ns = <0>;
+		cdns,tchsh-ns = <0>;
+		cdns,tslch-ns = <0>;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+

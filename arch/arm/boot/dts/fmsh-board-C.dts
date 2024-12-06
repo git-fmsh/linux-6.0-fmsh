@@ -1,0 +1,85 @@
+/*
+ * FMSH PSOC board DTS
+ * Child board C EMMC_SRAM
+ *
+ * Copyright (C) 2018 FMSH, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+#include "fmsh-psoc.dtsi"
+
+/ {
+	model = "FMSH PSOC Board";
+	compatible = "fmsh,fmsh-psoc";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00100000 0x3ff00000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/ram rw";
+		/* bootloader will place initrd at this address */
+		linux,initrd-start = <0x12000000>;
+		linux,initrd-end = <0x12800000>;
+	};
+
+        aliases {
+              serial0 = &uart0;
+              serial1 = &uart1;
+        };
+};
+
+&sram0 {
+	status = "okay";
+};
+
+&sram1 {
+	status = "okay";
+};
+
+&gmac0 {
+	status = "okay";
+};
+
+&gmac1 {
+	status = "disabled";
+};
+
+&mmc0 {
+	status = "okay";
+
+	non-removable; // emmc need this feature
+};
+
+&mmc1 {
+	status = "okay";
+
+	non-removable; // emmc need this feature
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+

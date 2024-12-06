@@ -1,0 +1,129 @@
+/*
+ * FMSH PSOC board DTS
+ * Child board C EMMC_SRAM
+ *
+ * Copyright (C) 2018 FMSH, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+#include "fmsh-psoc.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "FMSH PSOC QL45 Demo Board";
+	compatible = "fmsh,fmsh-psoc";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00100000 0x3ff00000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/ram rw";
+		// bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 root=/dev/mmcblk0p2 rw";
+		// bootargs = "console=ttyPS0,115200 earlyprintk loglevel=8 clk_ignore_unused root=/dev/ram rw";
+		/* bootloader will place initrd at this address */
+		linux,initrd-start = <0x12000000>;
+		linux,initrd-end = <0x12800000>;
+	};
+
+	aliases {
+			serial0 = &uart0;
+			serial1 = &uart1;
+	};
+};
+
+&clkc {
+	ps-clk-frequency = <33333333>;
+};
+
+&dmahost {
+	status = "okay";
+};
+
+&devcfg {
+	status = "okay";
+};
+
+&usbphy0 {
+	status = "okay";
+};
+
+&usb0 {
+//	dr_mode = "peripheral";
+	disable-over-current;
+	hnp-srp-disable;
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&mmc0 {
+	status = "okay";
+//	clock-freq-min-max = <400000 400000>;
+//	dmas = <&dmahost 0 0 0>;
+//	dma-names = "rx-tx";
+};
+
+&gmac0 {
+	status = "okay";
+	phy-handle = <&phy0>;
+	snps,reset-gpio = <&portb 17 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	snps,reset-delays-us = <0 10000 100000>;
+	mdio@0 {
+		compatible = "snps,dwmac-mdio";
+		#address-cells = <0x1>;
+		#size-cells = <0x0>;
+
+		phy0:eth-phy@0 {
+			reg = <7>;
+		};
+	};
+};
+
+&uart0 {
+	status = "okay";
+
+//	dmas = <&dmahost 10 0 0>, <&dmahost 11 0 0>;
+//	dma-names = "tx", "rx";
+};
+
+&qspi0 {
+	status = "okay";
+
+	flash: flash@0 {
+		compatible = "spansion,s25fl256s1", "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <20000000>;
+		cdns,read-delay = <2>;
+		cdns,tshsl-ns = <0>;
+		cdns,tsd2d-ns = <0>;
+		cdns,tchsh-ns = <0>;
+		cdns,tslch-ns = <0>;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+
+&i2c0 {
+	clock-frequency = <100000>;
+	status = "okay";
+};
