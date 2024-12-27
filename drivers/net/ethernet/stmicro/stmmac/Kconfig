@@ -212,6 +212,17 @@ config DWMAC_SUN8I
 	  stmmac device driver. This driver is used for H3/A83T/A64
 	  EMAC ethernet controller.
 
+config DWMAC_FMQL
+	tristate "FMQL GMAC support"
+	default ARCH_FMSH
+	depends on OF && (ARCH_FMSH || ARCH_FMQLMP || COMPILE_TEST)
+	help
+	  Support for FMQL 10/45/P100 GMAC ethernet controllers.
+
+	  This selects FMQL SoC glue layer support for the
+	  stmmac device driver. This driver is used for 7010/7045
+	  GMAC ethernet controller.
+
 config DWMAC_IMX8
 	tristate "NXP IMX8 DWMAC support"
 	default ARCH_MXC
