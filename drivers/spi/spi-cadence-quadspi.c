@@ -97,6 +97,19 @@ struct cqspi_driver_platdata {
 	int (*indirect_read_dma)(struct cqspi_flash_pdata *f_pdata,
 				 u_char *rxbuf, loff_t from_addr, size_t n_rx);
 	u32 (*get_dma_status)(struct cqspi_st *cqspi);
+	const void *pdata;
+};
+
+struct cqspi_of_data {
+	int     (*init)(struct device *dev);
+	int     (*exit)(struct device *dev);
+	void	*priv_data;
+	int		priv_size;
+};
+
+struct fmql_cqspi_priv {
+	struct clk		*hclk;
+	struct clk		*pclk;
 };
 
 /* Operation timeout value */
@@ -276,6 +289,25 @@ struct cqspi_driver_platdata {
 #define CQSPI_DMA_UNALIGN		0x3
 
 #define CQSPI_REG_VERSAL_DMA_VAL		0x602
+
+static const struct of_device_id cqspi_dt_ids[];
+static inline struct cqspi_of_data *dev_to_ofdata(struct device *dev)
+{
+	const struct of_device_id *of_id;
+	struct cqspi_driver_platdata *drv_data = NULL;
+	struct cqspi_of_data *of_data = NULL;
+
+	of_id = of_match_device(cqspi_dt_ids, dev);
+	if ((of_id) && (of_id->data)) {
+		drv_data = (struct cqspi_driver_platdata *)of_id->data;
+		if (drv_data->pdata) {
+			of_data = (struct cqspi_of_data *)drv_data->pdata;
+			return of_data;
+		}
+	}
+
+	return NULL;
+}
 
 static int cqspi_wait_for_bit(void __iomem *reg, const u32 mask, bool clr)
 {
@@ -1581,6 +1613,7 @@ static int cqspi_probe(struct platform_device *pdev)
 	struct resource *res_ahb;
 	struct cqspi_st *cqspi;
 	struct resource *res;
+	struct cqspi_of_data *of_data = NULL;
 	int ret;
 	int irq;
 
@@ -1641,6 +1674,13 @@ static int cqspi_probe(struct platform_device *pdev)
 	irq = platform_get_irq(pdev, 0);
 	if (irq < 0)
 		return -ENXIO;
+
+	of_data = dev_to_ofdata(&pdev->dev);
+	if (of_data && of_data->init) {
+		ret = of_data->init(&pdev->dev);
+		if (ret)
+			return ret;
+	}
 
 	pm_runtime_enable(dev);
 	ret = pm_runtime_resume_and_get(dev);
@@ -1747,6 +1787,7 @@ probe_clk_failed:
 static int cqspi_remove(struct platform_device *pdev)
 {
 	struct cqspi_st *cqspi = platform_get_drvdata(pdev);
+	struct cqspi_of_data *of_data = NULL;
 
 	spi_unregister_master(cqspi->master);
 	cqspi_controller_enable(cqspi, 0);
@@ -1758,6 +1799,10 @@ static int cqspi_remove(struct platform_device *pdev)
 
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
+
+	of_data = dev_to_ofdata(&pdev->dev);
+	if (of_data && of_data->exit)
+		of_data->exit(&pdev->dev);
 
 	return 0;
 }
@@ -1789,6 +1834,53 @@ static const struct dev_pm_ops cqspi__dev_pm_ops = {
 #define CQSPI_DEV_PM_OPS	NULL
 #endif
 
+static int fmql_cqspi_init(struct device *dev)
+{
+	struct cqspi_of_data *of_data = NULL;
+	struct fmql_cqspi_priv *priv;
+
+	of_data = dev_to_ofdata(dev);
+	priv = devm_kzalloc(dev, sizeof(struct fmql_cqspi_priv),
+					GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
+
+	of_data->priv_data = priv;
+
+	priv->pclk = devm_clk_get(dev, "pclk");
+	if (IS_ERR(priv->pclk))
+		return PTR_ERR(priv->pclk);
+
+	priv->hclk = devm_clk_get(dev, "hclk");
+	if (IS_ERR(priv->hclk))
+		return PTR_ERR(priv->hclk);
+
+	clk_prepare_enable(priv->pclk);
+	clk_prepare_enable(priv->hclk);
+
+	return 0;
+}
+
+static int fmql_cqspi_exit(struct device *dev)
+{
+	struct cqspi_of_data *of_data = NULL;
+	struct fmql_cqspi_priv *priv;
+
+	of_data = dev_to_ofdata(dev);
+	priv = of_data->priv_data;
+
+	clk_disable_unprepare(priv->pclk);
+	clk_disable_unprepare(priv->hclk);
+
+	return 0;
+}
+
+static struct cqspi_of_data fmql_data = {
+	.init = fmql_cqspi_init,
+	.exit = fmql_cqspi_exit,
+	.priv_size = sizeof(struct fmql_cqspi_priv),
+};
+
 static const struct cqspi_driver_platdata cdns_qspi = {
 	.quirks = CQSPI_DISABLE_DAC_MODE,
 };
@@ -1819,6 +1911,12 @@ static const struct cqspi_driver_platdata versal_ospi = {
 	.get_dma_status = cqspi_get_versal_dma_status,
 };
 
+static const struct cqspi_driver_platdata fmsh_qspi = {
+	.hwcaps_mask = CQSPI_SUPPORTS_OCTAL,
+	.pdata = &fmql_data,
+	.quirks = CQSPI_NEEDS_WR_DELAY,
+};
+
 static const struct of_device_id cqspi_dt_ids[] = {
 	{
 		.compatible = "cdns,qspi-nor",
@@ -1843,6 +1941,10 @@ static const struct of_device_id cqspi_dt_ids[] = {
 	{
 		.compatible = "intel,socfpga-qspi",
 		.data = &socfpga_qspi,
+	},
+	{
+		.compatible = "fmsh,qspi-nor",
+		.data = &fmsh_qspi,
 	},
 	{ /* end of table */ }
 };
