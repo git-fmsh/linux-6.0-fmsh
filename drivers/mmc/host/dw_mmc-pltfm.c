@@ -66,6 +66,7 @@ static const struct of_device_id dw_mci_pltfm_match[] = {
 	{ .compatible = "snps,dw-mshc", },
 	{ .compatible = "altr,socfpga-dw-mshc", },
 	{ .compatible = "img,pistachio-dw-mshc", },
+	{ .compatible = "fmsh,psoc-dw-mshc", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
